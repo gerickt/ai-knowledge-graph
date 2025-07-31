@@ -1,46 +1,46 @@
 <div class="card" style="width: 100%; height: 100vh; display: flex; flex-direction: column;">
     <div id="graph-controls" style="margin: 10px; display: flex; justify-content: space-between;">
         <div>
-            <button onclick="togglePhysics()" id="physics-toggle" class="btn btn-primary">Disable Physics</button>
-            <button onclick="togglePhysicsSettings()" id="physics-settings-toggle" class="btn btn-outline-info">Physics Settings</button>
-            <button onclick="stabilizeNetwork()" class="btn btn-secondary">Stabilize</button>
-            <button onclick="toggleDarkMode()" id="theme-toggle" class="btn btn-info">Dark Mode</button>
-            <button onclick="toggleFilterMenu()" id="filter-toggle" class="btn btn-outline-info">Show Filters</button>
-            <button onclick="toggleLabels()" id="labels-toggle" class="btn btn-primary">Hide Labels</button>
-            <button onclick="toggleStats()" id="stats-toggle" class="btn btn-outline-secondary">Stats</button>
+            <button onclick="togglePhysics()" id="physics-toggle" class="btn btn-primary">Deshabilitar Física</button>
+            <button onclick="togglePhysicsSettings()" id="physics-settings-toggle" class="btn btn-outline-info">Configuración Física</button>
+            <button onclick="stabilizeNetwork()" class="btn btn-secondary">Estabilizar</button>
+            <button onclick="toggleDarkMode()" id="theme-toggle" class="btn btn-info">Modo Oscuro</button>
+            <button onclick="toggleFilterMenu()" id="filter-toggle" class="btn btn-outline-info">Mostrar Filtros</button>
+            <button onclick="toggleLabels()" id="labels-toggle" class="btn btn-primary">Ocultar Etiquetas</button>
+            <button onclick="toggleStats()" id="stats-toggle" class="btn btn-outline-secondary">Estadísticas</button>
         </div>
         <div>
-            <span style="margin-right: 15px;"><strong>Edge Types:</strong></span>
+            <span style="margin-right: 15px;"><strong>Tipos de Aristas:</strong></span>
             <span style="width: 30px; height: 2px; background-color: #666666; display: inline-block; margin-right: 5px;"></span>
-            <span style="margin-right: 15px;">Extracted</span>
+            <span style="margin-right: 15px;">Extraídas</span>
             <span style="width: 30px; height: 2px; border-top: 1px dashed #666666; display: inline-block; margin-right: 5px;"></span>
-            <span>Inferred</span>
+            <span>Inferidas</span>
         </div>
     </div>
     
     <div id="stats-container" style="display: none; margin: 10px; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
-        <h5>Graph Statistics</h5>
+        <h5>Estadísticas del Grafo</h5>
         <div style="display: flex; flex-wrap: wrap; gap: 20px;">
             <div class="stat-item">
-                <strong>Nodes:</strong> <span id="stat-nodes">-</span>
+                <strong>Nodos:</strong> <span id="stat-nodes">-</span>
             </div>
             <div class="stat-item">
-                <strong>Edges:</strong> <span id="stat-edges">-</span>
+                <strong>Aristas:</strong> <span id="stat-edges">-</span>
             </div>
             <div class="stat-item">
-                <strong>Extracted Edges:</strong> <span id="stat-extracted">-</span>
+                <strong>Aristas Extraídas:</strong> <span id="stat-extracted">-</span>
             </div>
             <div class="stat-item">
-                <strong>Inferred Edges:</strong> <span id="stat-inferred">-</span>
+                <strong>Aristas Inferidas:</strong> <span id="stat-inferred">-</span>
             </div>
             <div class="stat-item">
-                <strong>Communities:</strong> <span id="stat-communities">-</span>
+                <strong>Comunidades:</strong> <span id="stat-communities">-</span>
             </div>
         </div>
     </div>
     
     <div id="physics-settings-container" style="display: none; margin: 10px; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
-        <h5>Physics Settings</h5>
+        <h5>Configuración Física</h5>
         <div style="display: flex; flex-wrap: wrap; gap: 15px;">
             <div style="min-width: 200px;">
                 <label for="physics-solver">Solver</label>

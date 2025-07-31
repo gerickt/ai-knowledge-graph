@@ -1,147 +1,165 @@
-"""Centralized repository for all LLM prompts used in the knowledge graph system."""
+"""Repositorio centralizado para todos los prompts de LLM utilizados en el sistema de grafos de conocimiento."""
 
-# Phase 1: Main extraction prompts
+# Fase 1: Prompts principales de extracción
 MAIN_SYSTEM_PROMPT = """
-You are an advanced AI system specialized in knowledge extraction and knowledge graph generation.
-Your expertise includes identifying consistent entity references and meaningful relationships in text.
-CRITICAL INSTRUCTION: All relationships (predicates) MUST be no more than 3 words maximum. Ideally 1-2 words. This is a hard limit.
+Eres un sistema de IA avanzado especializado en extracción de conocimiento y generación de grafos de conocimiento.
+Tu experiencia incluye identificar referencias consistentes de entidades y relaciones significativas en texto.
+INSTRUCCIÓN CRÍTICA: Todas las relaciones (predicados) DEBEN tener un máximo de 3 palabras. Idealmente 1-2 palabras. Este es un límite estricto.
 """
 
 MAIN_USER_PROMPT = """
-Your task: Read the text below (delimited by triple backticks) and identify all Subject-Predicate-Object (S-P-O) relationships in each sentence. Then produce a single JSON array of objects, each representing one triple.
+Tu tarea: Lee el texto a continuación (delimitado por tres comillas invertidas) e identifica todas las relaciones Sujeto-Predicado-Objeto (S-P-O) semánticamente significativas. Luego produce un único arreglo JSON de objetos, cada uno representando un triplete.
 
-Follow these rules carefully:
+REGLAS CRÍTICAS PARA ENTIDADES DE CALIDAD:
 
-- Entity Consistency: Use consistent names for entities throughout the document. For example, if "John Smith" is mentioned as "John", "Mr. Smith", and "John Smith" in different places, use a single consistent form (preferably the most complete one) in all triples.
-- Atomic Terms: Identify distinct key terms (e.g., objects, locations, organizations, acronyms, people, conditions, concepts, feelings). Avoid merging multiple ideas into one term (they should be as "atomistic" as possible).
-- Unified References: Replace any pronouns (e.g., "he," "she," "it," "they," etc.) with the actual referenced entity, if identifiable.
-- Pairwise Relationships: If multiple terms co-occur in the same sentence (or a short paragraph that makes them contextually related), create one triple for each pair that has a meaningful relationship.
-- CRITICAL INSTRUCTION: Predicates MUST be 1-3 words maximum. Never more than 3 words. Keep them extremely concise.
-- Ensure that all possible relationships are identified in the text and are captured in an S-P-O relation.
-- Standardize terminology: If the same concept appears with slight variations (e.g., "artificial intelligence" and "AI"), use the most common or canonical form consistently.
-- Make all the text of S-P-O text lower-case, even Names of people and places.
-- If a person is mentioned by name, create a relation to their location, profession and what they are known for (invented, wrote, started, title, etc.) if known and if it fits the context of the informaiton. 
+🎯 **Filtrado de Entidades Semánticamente Ricas**:
+- SOLO extrae entidades que sean conceptos sustantivos, específicos y semánticamente ricos
+- EXCLUYE: artículos (el, la, los, las), preposiciones (de, con, para, por), pronombres (él, ella, esto, eso), adverbios genéricos (muy, más, menos)
+- EXCLUYE: términos demasiado generales como "cosa", "algo", "persona", "lugar", "forma", "manera", "parte", "tipo"
+- PREFIERE: nombres propios, conceptos específicos, organizaciones, ubicaciones, tecnologías, procesos, eventos
 
-Important Considerations:
-- Aim for precision in entity naming - use specific forms that distinguish between similar but different entities
-- Maximize connectedness by using identical entity names for the same concepts throughout the document
-- Consider the entire context when identifying entity references
-- ALL PREDICATES MUST BE 3 WORDS OR FEWER - this is a hard requirement
+🔍 **Ejemplos de Entidades BUENAS vs MALAS**:
+- ✅ BUENAS: "inteligencia artificial", "universidad complutense", "madrid", "revolución industrial", "machine learning", "covid-19"
+- ❌ MALAS: "el", "de", "con", "cosa", "algo", "forma", "manera", "muy", "más", "parte"
 
-Output Requirements:
+📝 **Reglas de Construcción de Entidades**:
+- Consistencia de Entidades: Usa nombres consistentes para las entidades en todo el documento
+- Términos Atómicos: Identifica conceptos clave distintos (nombres propios, organizaciones, tecnologías, ubicaciones, eventos, procesos)
+- Referencias Unificadas: Reemplaza pronombres con la entidad real referenciada
+- Formas Canónicas: Si "inteligencia artificial" e "IA" se mencionan, usa la forma más descriptiva
+- Minúsculas Consistentes: Convierte todo a minúsculas excepto acrónimos establecidos
 
-- Do not include any text or commentary outside of the JSON.
-- Return only the JSON array, with each triple as an object containing "subject", "predicate", and "object".
-- Make sure the JSON is valid and properly formatted.
+🔗 **Reglas para Predicados**:
+- INSTRUCCIÓN CRÍTICA: Los predicados DEBEN tener máximo 1-3 palabras. Nunca más de 3 palabras
+- Usa verbos de acción específicos: "desarrolla", "causa", "pertenece a", "influye en", "se basa en"
+- Evita predicados genéricos como "se relaciona con" - sé más específico
 
-Example of the desired output structure:
+⚡ **Criterios de Calidad**:
+- Cada entidad debe aportar valor semántico al grafo de conocimiento
+- Prioriza relaciones causales, pertenencia, desarrollo, influencia, ubicación
+- Si una entidad no sobrevive a la pregunta "¿esto es conceptualmente importante?", exclúyela
+- Enfócate en la riqueza semántica sobre la cantidad
+
+Consideraciones Importantes:
+- Apunta a la precisión en el nombrado de entidades - usa formas específicas que distingan entre entidades similares
+- Maximiza la conectividad usando nombres de entidades idénticos para los mismos conceptos
+- Considera todo el contexto al identificar referencias de entidades
+- TODOS LOS PREDICADOS DEBEN SER DE 3 PALABRAS O MENOS - este es un requisito estricto
+
+Requisitos de Salida:
+
+- No incluyas ningún texto o comentario fuera del JSON.
+- Devuelve solo el arreglo JSON, con cada triplete como un objeto que contenga "subject", "predicate", y "object".
+- Asegúrate de que el JSON sea válido y esté correctamente formateado.
+
+Ejemplo de la estructura de salida deseada:
 
 [
   {
-    "subject": "Term A",
-    "predicate": "relates to",  // Notice: only 2 words
-    "object": "Term B"
+    "subject": "término a",
+    "predicate": "se relaciona con",  // Nota: solo 3 palabras
+    "object": "término b"
   },
   {
-    "subject": "Term C",
-    "predicate": "uses",  // Notice: only 1 word
-    "object": "Term D"
+    "subject": "término c",
+    "predicate": "usa",  // Nota: solo 1 palabra
+    "object": "término d"
   }
 ]
 
-Important: Only output the JSON array (with the S-P-O objects) and nothing else
+Importante: Solo genera el arreglo JSON (con los objetos S-P-O) y nada más
 
-Text to analyze (between triple backticks):
+Texto a analizar (entre tres comillas invertidas):
 """
 
-# Phase 2: Entity standardization prompts
+# Fase 2: Prompts de estandarización de entidades
 ENTITY_RESOLUTION_SYSTEM_PROMPT = """
-You are an expert in entity resolution and knowledge representation.
-Your task is to standardize entity names from a knowledge graph to ensure consistency.
+Eres un experto en resolución de entidades y representación del conocimiento.
+Tu tarea es estandarizar nombres de entidades de un grafo de conocimiento para asegurar consistencia.
 """
 
 def get_entity_resolution_user_prompt(entity_list):
     return f"""
-Below is a list of entity names extracted from a knowledge graph. 
-Some may refer to the same real-world entities but with different wording.
+A continuación se presenta una lista de nombres de entidades extraídas de un grafo de conocimiento.
+Algunas pueden referirse a las mismas entidades del mundo real pero con diferente redacción.
 
-Please identify groups of entities that refer to the same concept, and provide a standardized name for each group.
-Return your answer as a JSON object where the keys are the standardized names and the values are arrays of all variant names that should map to that standard name.
-Only include entities that have multiple variants or need standardization.
+Por favor identifica grupos de entidades que se refieren al mismo concepto, y proporciona un nombre estandarizado para cada grupo.
+Devuelve tu respuesta como un objeto JSON donde las claves son los nombres estandarizados y los valores son arreglos de todos los nombres variantes que deben mapear a ese nombre estándar.
+Solo incluye entidades que tengan múltiples variantes o necesiten estandarización.
 
-Entity list:
+Lista de entidades:
 {entity_list}
 
-Format your response as valid JSON like this:
+Formatea tu respuesta como JSON válido así:
 {{
-  "standardized name 1": ["variant 1", "variant 2"],
-  "standardized name 2": ["variant 3", "variant 4", "variant 5"]
+  "nombre estandarizado 1": ["variante 1", "variante 2"],
+  "nombre estandarizado 2": ["variante 3", "variante 4", "variante 5"]
 }}
 """
 
-# Phase 3: Community relationship inference prompts
+# Fase 3: Prompts de inferencia de relaciones entre comunidades
 RELATIONSHIP_INFERENCE_SYSTEM_PROMPT = """
-You are an expert in knowledge representation and inference. 
-Your task is to infer plausible relationships between disconnected entities in a knowledge graph.
+Eres un experto en representación del conocimiento e inferencia.
+Tu tarea es inferir relaciones plausibles entre entidades desconectadas en un grafo de conocimiento.
 """
 
 def get_relationship_inference_user_prompt(entities1, entities2, triples_text):
     return f"""
-I have a knowledge graph with two disconnected communities of entities. 
+Tengo un grafo de conocimiento con dos comunidades desconectadas de entidades.
 
-Community 1 entities: {entities1}
-Community 2 entities: {entities2}
+Entidades de la Comunidad 1: {entities1}
+Entidades de la Comunidad 2: {entities2}
 
-Here are some existing relationships involving these entities:
+Aquí hay algunas relaciones existentes que involucran estas entidades:
 {triples_text}
 
-Please infer 2-3 plausible relationships between entities from Community 1 and entities from Community 2.
-Return your answer as a JSON array of triples in the following format:
+Por favor infiere 2-3 relaciones plausibles entre entidades de la Comunidad 1 y entidades de la Comunidad 2.
+Devuelve tu respuesta como un arreglo JSON de tripletes en el siguiente formato:
 
 [
   {{
-    "subject": "entity from community 1",
-    "predicate": "inferred relationship",
-    "object": "entity from community 2"
+    "subject": "entidad de la comunidad 1",
+    "predicate": "relación inferida",
+    "object": "entidad de la comunidad 2"
   }},
   ...
 ]
 
-Only include highly plausible relationships with clear predicates.
-IMPORTANT: The inferred relationships (predicates) MUST be no more than 3 words maximum. Preferably 1-2 words. Never more than 3.
-For predicates, use short phrases that clearly describe the relationship.
-IMPORTANT: Make sure the subject and object are different entities - avoid self-references.
+Solo incluye relaciones altamente plausibles con predicados claros.
+IMPORTANTE: Las relaciones inferidas (predicados) DEBEN tener un máximo de 3 palabras. Preferiblemente 1-2 palabras. Nunca más de 3.
+Para predicados, usa frases cortas que describan claramente la relación.
+IMPORTANTE: Asegúrate de que el sujeto y objeto sean entidades diferentes - evita auto-referencias.
 """
 
-# Phase 4: Within-community relationship inference prompts
+# Fase 4: Prompts de inferencia de relaciones dentro de comunidades
 WITHIN_COMMUNITY_INFERENCE_SYSTEM_PROMPT = """
-You are an expert in knowledge representation and inference. 
-Your task is to infer plausible relationships between semantically related entities that are not yet connected in a knowledge graph.
+Eres un experto en representación del conocimiento e inferencia.
+Tu tarea es inferir relaciones plausibles entre entidades semánticamente relacionadas que aún no están conectadas en un grafo de conocimiento.
 """
 
 def get_within_community_inference_user_prompt(pairs_text, triples_text):
     return f"""
-I have a knowledge graph with several entities that appear to be semantically related but are not directly connected.
+Tengo un grafo de conocimiento con varias entidades que parecen estar semánticamente relacionadas pero no están directamente conectadas.
 
-Here are some pairs of entities that might be related:
+Aquí hay algunos pares de entidades que podrían estar relacionadas:
 {pairs_text}
 
-Here are some existing relationships involving these entities:
+Aquí hay algunas relaciones existentes que involucran estas entidades:
 {triples_text}
 
-Please infer plausible relationships between these disconnected pairs.
-Return your answer as a JSON array of triples in the following format:
+Por favor infiere relaciones plausibles entre estos pares desconectados.
+Devuelve tu respuesta como un arreglo JSON de tripletes en el siguiente formato:
 
 [
   {{
-    "subject": "entity1",
-    "predicate": "inferred relationship",
-    "object": "entity2"
+    "subject": "entidad1",
+    "predicate": "relación inferida",
+    "object": "entidad2"
   }},
   ...
 ]
 
-Only include highly plausible relationships with clear predicates.
-IMPORTANT: The inferred relationships (predicates) MUST be no more than 3 words maximum. Preferably 1-2 words. Never more than 3.
-IMPORTANT: Make sure that the subject and object are different entities - avoid self-references.
+Solo incluye relaciones altamente plausibles con predicados claros.
+IMPORTANTE: Las relaciones inferidas (predicados) DEBEN tener un máximo de 3 palabras. Preferiblemente 1-2 palabras. Nunca más de 3.
+IMPORTANTE: Asegúrate de que el sujeto y objeto sean entidades diferentes - evita auto-referencias.
 """ 

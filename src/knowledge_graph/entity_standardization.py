@@ -2,6 +2,34 @@
 import re
 from collections import defaultdict
 from src.knowledge_graph.llm import call_llm
+
+def get_spanish_stopwords():
+    """
+    Return a comprehensive set of Spanish stopwords.
+    
+    Returns:
+        set: Set of Spanish stopwords for filtering
+    """
+    return {
+        # Articles
+        "el", "la", "los", "las", "un", "una", "unos", "unas",
+        # Prepositions
+        "a", "ante", "bajo", "con", "contra", "de", "del", "desde", "durante", "en", "entre", "hacia", "hasta", "mediante", "para", "por", "según", "sin", "sobre", "tras",
+        # Pronouns
+        "yo", "tú", "él", "ella", "nosotros", "nosotras", "vosotros", "vosotras", "ellos", "ellas", "me", "te", "se", "le", "les", "lo", "los", "la", "las", "nos", "os", "su", "sus", "mi", "mis", "tu", "tus",
+        # Conjunctions
+        "y", "o", "pero", "sino", "aunque", "porque", "que", "si", "como", "cuando", "donde", "mientras", "tanto", "tan",
+        # Verbs (common auxiliary and copular verbs)
+        "ser", "estar", "haber", "tener", "hacer", "poder", "deber", "ir", "venir", "ver", "dar", "saber", "querer", "decir", "es", "son", "fue", "fueron", "era", "eran", "será", "serán", "sea", "sean", "está", "están", "estaba", "estaban", "estará", "estarán", "esté", "estén", "ha", "han", "había", "habían", "habrá", "habrán", "haya", "hayan", "he", "has", "hay",
+        # Adverbs
+        "no", "ni", "sí", "también", "tampoco", "además", "muy", "más", "menos", "mucho", "poco", "bastante", "demasiado", "bien", "mal", "mejor", "peor", "aquí", "ahí", "allí", "cerca", "lejos", "arriba", "abajo", "delante", "detrás", "dentro", "fuera", "antes", "después", "ahora", "entonces", "luego", "siempre", "nunca", "jamás", "ya", "aún", "todavía", "ayer", "hoy", "mañana",
+        # Quantifiers and determiners
+        "todo", "toda", "todos", "todas", "algún", "alguna", "algunos", "algunas", "ningún", "ninguna", "ningunos", "ningunas", "otro", "otra", "otros", "otras", "mismo", "misma", "mismos", "mismas", "cada", "cualquier", "cualquiera", "varios", "varias", "cierto", "cierta", "ciertos", "ciertas",
+        # Question words
+        "qué", "quién", "quiénes", "cuál", "cuáles", "cuándo", "cómo", "dónde", "por qué", "para qué",
+        # Common words that should be filtered
+        "al", "como", "entre", "hacia", "hasta", "mediante", "durante", "dentro", "fuera", "cerca", "lejos", "donde", "cuando", "porque", "aunque", "mientras", "tanto", "tan"
+    }
 from src.knowledge_graph.prompts import (
     ENTITY_RESOLUTION_SYSTEM_PROMPT, 
     get_entity_resolution_user_prompt,
@@ -30,7 +58,7 @@ def limit_predicate_length(predicate, max_words=3):
     shortened = ' '.join(words[:max_words])
     
     # Remove trailing prepositions or articles if they're the last word
-    stop_words = {'a', 'an', 'the', 'of', 'with', 'by', 'to', 'from', 'in', 'on', 'for'}
+    stop_words = get_spanish_stopwords()
     last_word = shortened.split()[-1].lower()
     if last_word in stop_words and len(words) > 1:
         shortened = ' '.join(shortened.split()[:-1])
@@ -51,7 +79,7 @@ def standardize_entities(triples, config):
     if not triples:
         return triples
     
-    print("Standardizing entity names across all triples...")
+    print("Estandarizando nombres de entidades en todos los tripletes...")
     
     # Validate input triples to ensure they have the required fields
     valid_triples = []
@@ -64,10 +92,10 @@ def standardize_entities(triples, config):
             invalid_count += 1
     
     if invalid_count > 0:
-        print(f"Warning: Filtered out {invalid_count} invalid triples missing required fields")
+        print(f"Advertencia: Se filtraron {invalid_count} tripletes inválidos que carecían de campos requeridos")
     
     if not valid_triples:
-        print("Error: No valid triples found for entity standardization")
+        print("Error: No se encontraron tripletes válidos para la estandarización de entidades")
         return []
     
     # 1. Extract all unique entities
@@ -85,7 +113,7 @@ def standardize_entities(triples, config):
         # Convert to lowercase
         text = text.lower()
         # Remove common stopwords that might appear in entity names
-        stopwords = {"the", "a", "an", "of", "and", "or", "in", "on", "at", "to", "for", "with", "by", "as"}
+        stopwords = get_spanish_stopwords()
         words = [word for word in re.findall(r'\b\w+\b', text) if word not in stopwords]
         return " ".join(words)
     
@@ -182,9 +210,9 @@ def standardize_entities(triples, config):
     # 7. Filter out self-referencing triples
     filtered_triples = [triple for triple in standardized_triples if triple["subject"] != triple["object"]]
     if len(filtered_triples) < len(standardized_triples):
-        print(f"Removed {len(standardized_triples) - len(filtered_triples)} self-referencing triples")
+        print(f"Se removieron {len(standardized_triples) - len(filtered_triples)} tripletes auto-referenciados")
     
-    print(f"Standardized {len(all_entities)} entities into {len(set(standardized_entities.values()))} standard forms")
+    print(f"Se estandarizaron {len(all_entities)} entidades en {len(set(standardized_entities.values()))} formas estándar")
     return filtered_triples
 
 def infer_relationships(triples, config):
@@ -201,7 +229,7 @@ def infer_relationships(triples, config):
     if not triples or len(triples) < 2:
         return triples
     
-    print("Inferring additional relationships between entities...")
+    print("Infiriendo relaciones adicionales entre entidades...")
     
     # Validate input triples to ensure they have the required fields
     valid_triples = []
@@ -214,10 +242,10 @@ def infer_relationships(triples, config):
             invalid_count += 1
     
     if invalid_count > 0:
-        print(f"Warning: Filtered out {invalid_count} invalid triples missing required fields")
+        print(f"Advertencia: Se filtraron {invalid_count} tripletes inválidos que carecían de campos requeridos")
     
     if not valid_triples:
-        print("Error: No valid triples found for relationship inference")
+        print("Error: No se encontraron tripletes válidos para la inferencia de relaciones")
         return []
     
     # Create a graph representation for easier traversal
@@ -232,7 +260,7 @@ def infer_relationships(triples, config):
     
     # Find disconnected communities
     communities = _identify_communities(graph)
-    print(f"Identified {len(communities)} disconnected communities in the graph")
+    print(f"Se identificaron {len(communities)} comunidades desconectadas en el grafo")
     
     new_triples = []
     
@@ -272,9 +300,9 @@ def infer_relationships(triples, config):
     # Filter out self-referencing triples
     filtered_triples = [triple for triple in unique_triples if triple["subject"] != triple["object"]]
     if len(filtered_triples) < len(unique_triples):
-        print(f"Removed {len(unique_triples) - len(filtered_triples)} self-referencing triples")
+        print(f"Se removieron {len(unique_triples) - len(filtered_triples)} tripletes auto-referenciados")
     
-    print(f"Added {len(filtered_triples) - len(triples)} inferred relationships")
+    print(f"Se agregaron {len(filtered_triples) - len(triples)} relaciones inferidas")
     return filtered_triples
 
 def _identify_communities(graph):
@@ -446,12 +474,12 @@ def _resolve_entities_with_llm(triples, config):
                 triple["subject"] = entity_to_standard.get(triple["subject"], triple["subject"])
                 triple["object"] = entity_to_standard.get(triple["object"], triple["object"])
                 
-            print(f"Applied LLM-based entity standardization for {len(entity_mapping)} entity groups")
+            print(f"Se aplicó estandarización de entidades basada en LLM para {len(entity_mapping)} grupos de entidades")
         else:
-            print("Could not extract valid entity mapping from LLM response")
+            print("No se pudo extraer mapeo válido de entidades de la respuesta del LLM")
     
     except Exception as e:
-        print(f"Error in LLM-based entity resolution: {e}")
+        print(f"Error en la resolución de entidades basada en LLM: {e}")
     
     return triples
 
@@ -469,7 +497,7 @@ def _infer_relationships_with_llm(triples, communities, config):
     """
     # Skip if there's only one community
     if len(communities) <= 1:
-        print("Only one community found, skipping LLM-based relationship inference")
+        print("Solo se encontró una comunidad, omitiendo la inferencia de relaciones basada en LLM")
         return []
     
     # Focus on the largest communities
@@ -538,12 +566,12 @@ def _infer_relationships_with_llm(triples, communities, config):
                             triple["predicate"] = limit_predicate_length(triple["predicate"])
                             new_triples.append(triple)
                     
-                    print(f"Inferred {len(new_triples)} new relationships between communities")
+                    print(f"Se infirieron {len(new_triples)} nuevas relaciones entre comunidades")
                 else:
-                    print("Could not extract valid inferred relationships from LLM response")
+                    print("No se pudieron extraer relaciones inferidas válidas de la respuesta del LLM")
             
             except Exception as e:
-                print(f"Error in LLM-based relationship inference: {e}")
+                print(f"Error en la inferencia de relaciones basada en LLM: {e}")
     
     return new_triples 
 
@@ -652,12 +680,12 @@ def _infer_within_community_relationships(triples, communities, config):
                         triple["predicate"] = limit_predicate_length(triple["predicate"])
                         new_triples.append(triple)
                 
-                print(f"Inferred {len(inferred_triples)} new relationships within communities")
+                print(f"Se infirieron {len(inferred_triples)} nuevas relaciones dentro de las comunidades")
             else:
                 print("Could not extract valid inferred relationships from LLM response")
         
         except Exception as e:
-            print(f"Error in LLM-based relationship inference within communities: {e}")
+            print(f"Error en la inferencia de relaciones basada en LLM dentro de las comunidades: {e}")
     
     return new_triples
 
@@ -716,21 +744,21 @@ def _infer_relationships_by_lexical_similarity(entities, triples):
                     if e1_lower.startswith(main_shared) and not e2_lower.startswith(main_shared):
                         new_triples.append({
                             "subject": entity2,
-                            "predicate": "relates to",
+                            "predicate": "se relaciona con",
                             "object": entity1,
                             "inferred": True
                         })
                     elif e2_lower.startswith(main_shared) and not e1_lower.startswith(main_shared):
                         new_triples.append({
                             "subject": entity1,
-                            "predicate": "relates to",
+                            "predicate": "se relaciona con",
                             "object": entity2,
                             "inferred": True
                         })
                     else:
                         new_triples.append({
                             "subject": entity1,
-                            "predicate": "related to",
+                            "predicate": "relacionado con",
                             "object": entity2,
                             "inferred": True
                         })
@@ -739,17 +767,17 @@ def _infer_relationships_by_lexical_similarity(entities, triples):
             elif e1_lower in e2_lower:
                 new_triples.append({
                     "subject": entity2,
-                    "predicate": "is type of",
+                    "predicate": "es tipo de",
                     "object": entity1,
                     "inferred": True
                 })
             elif e2_lower in e1_lower:
                 new_triples.append({
                     "subject": entity1,
-                    "predicate": "is type of",
+                    "predicate": "es tipo de",
                     "object": entity2,
                     "inferred": True
                 })
     
-    print(f"Inferred {len(new_triples)} relationships based on lexical similarity")
+    print(f"Se infirieron {len(new_triples)} relaciones basadas en similitud léxica")
     return new_triples 

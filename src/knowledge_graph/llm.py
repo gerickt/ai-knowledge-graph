@@ -75,7 +75,7 @@ def extract_json_from_text(text):
     code_match = re.search(code_block_pattern, text)
     if code_match:
         text = code_match.group(1).strip()
-        print("Found JSON in code block, extracting content...")
+        print("Se encontró JSON en bloque de código, extrayendo contenido...")
     
     try:
         # Try direct parsing in case the response is already clean JSON
@@ -84,7 +84,7 @@ def extract_json_from_text(text):
         # Look for opening and closing brackets of a JSON array
         start_idx = text.find('[')
         if start_idx == -1:
-            print("No JSON array start found in text")
+            print("No se encontró inicio de arreglo JSON en el texto")
             return None
             
         # Simple bracket counting to find matching closing bracket
@@ -106,8 +106,8 @@ def extract_json_from_text(text):
             try:
                 return json.loads(json_str)
             except json.JSONDecodeError:
-                print("Found JSON-like structure but couldn't parse it.")
-                print("Trying to fix common formatting issues...")
+                print("Se encontró estructura tipo JSON pero no se pudo analizar.")
+                print("Intentando corregir problemas comunes de formato...")
                 
                 # Try to fix missing quotes around keys
                 fixed_json = re.sub(r'(\s*)(\w+)(\s*):(\s*)', r'\1"\2"\3:\4', json_str)
@@ -117,10 +117,10 @@ def extract_json_from_text(text):
                 try:
                     return json.loads(fixed_json)
                 except:
-                    print("Could not fix JSON format issues")
+                    print("No se pudieron corregir los problemas de formato JSON")
         else:
             # Handle incomplete JSON - try to complete it
-            print("Found incomplete JSON array, attempting to complete it...")
+            print("Se encontró arreglo JSON incompleto, intentando completarlo...")
             
             # Get all complete objects from the array
             objects = []
@@ -146,8 +146,8 @@ def extract_json_from_text(text):
                 try:
                     return json.loads(reconstructed_json)
                 except json.JSONDecodeError:
-                    print("Couldn't parse reconstructed JSON array.")
-                    print("Trying to fix common formatting issues...")
+                    print("No se pudo analizar el arreglo JSON reconstruido.")
+                    print("Intentando corregir problemas comunes de formato...")
                     
                     # Try to fix missing quotes around keys
                     fixed_json = re.sub(r'(\s*)(\w+)(\s*):(\s*)', r'\1"\2"\3:\4', reconstructed_json)
@@ -157,7 +157,7 @@ def extract_json_from_text(text):
                     try:
                         return json.loads(fixed_json)
                     except:
-                        print("Could not fix JSON format issues in reconstructed array")
+                        print("No se pudieron corregir los problemas de formato JSON en el arreglo reconstruido")
             
-        print("No complete JSON array could be extracted")
+        print("No se pudo extraer ningún arreglo JSON completo")
         return None 

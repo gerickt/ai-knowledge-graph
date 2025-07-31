@@ -16,5 +16,5 @@ def load_config(config_file="config.toml"):
         with open(config_file, "rb") as f:
             return tomli.load(f)
     except Exception as e:
-        print(f"Error loading config file: {e}")
+        print(f"Error cargando archivo de configuración: {e}")
         return None 

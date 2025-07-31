@@ -6,3 +6,10 @@ lib/
 
 *.egg-info
 __pycache__
+
+# Custom
+data/
+output/
+CLAUDE.md
+venv/
+.venv/

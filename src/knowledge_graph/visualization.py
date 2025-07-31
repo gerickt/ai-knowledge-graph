@@ -13,7 +13,7 @@ def _load_html_template():
         with open(template_path, 'r', encoding='utf-8') as f:
             return f.read()
     except Exception as e:
-        print(f"Warning: Could not load template file: {e}")
+        print(f"Advertencia: No se pudo cargar el archivo de plantilla: {e}")
         return '<div id="mynetwork" class="card-body"></div>'  # Fallback to basic template
 
 def visualize_knowledge_graph(triples, output_file="knowledge_graph.html", edge_smooth=None, config=None):
@@ -38,10 +38,10 @@ def visualize_knowledge_graph(triples, output_file="knowledge_graph.html", edge_
         edge_smooth = False
     
     if not triples:
-        print("Warning: No triples provided for visualization")
+        print("Advertencia: No se proporcionaron tripletes para la visualización")
         return {"nodes": 0, "edges": 0, "communities": 0}
         
-    print(f"Processing {len(triples)} triples for visualization")
+    print(f"Procesando {len(triples)} tripletes para visualización")
     
     # Create a directed graph
     G = nx.DiGraph()
@@ -66,8 +66,8 @@ def visualize_knowledge_graph(triples, output_file="knowledge_graph.html", edge_
         if triple.get("inferred", False):
             inferred_edges.add((subject, obj))
     
-    print(f"Found {len(all_nodes)} unique nodes")
-    print(f"Found {len(inferred_edges)} inferred relationships")
+    print(f"Se encontraron {len(all_nodes)} nodos únicos")
+    print(f"Se encontraron {len(inferred_edges)} relaciones inferidas")
     
     # Create an undirected graph for community detection and centrality measures
     G_undirected = nx.Graph()
@@ -134,8 +134,8 @@ def visualize_knowledge_graph(triples, output_file="knowledge_graph.html", edge_
     )
     
     # Dump some debug info
-    print(f"Nodes in NetworkX graph: {G.number_of_nodes()}")
-    print(f"Edges in NetworkX graph: {G.number_of_edges()}")
+    print(f"Nodos en el grafo NetworkX: {G.number_of_nodes()}")
+    print(f"Aristas en el grafo NetworkX: {G.number_of_edges()}")
     
     # Add nodes and edges from NetworkX graph - do this explicitly for better control
     _add_nodes_and_edges_to_network(net, G)
@@ -159,7 +159,7 @@ def visualize_knowledge_graph(triples, output_file="knowledge_graph.html", edge_
         "inferred_edges": len(inferred_edges),
         "communities": len(set(node_communities.values()))
     }
-    print(f"Graph Statistics: {json.dumps(stats, indent=2)}")
+    print(f"Estadísticas del Grafo: {json.dumps(stats, indent=2)}")
     return stats
 
 def _calculate_centrality_metrics(G_undirected, all_nodes):
@@ -190,7 +190,7 @@ def _detect_communities(G_undirected, all_nodes):
         import community as community_louvain
         partition = community_louvain.best_partition(G_undirected)
         community_count = len(set(partition.values()))
-        print(f"Detected {community_count} communities using Louvain method")
+        print(f"Se detectaron {community_count} comunidades usando el método Louvain")
         return partition, community_count
     except:
         # Fallback: assign community IDs based on degree for simplicity
@@ -201,7 +201,7 @@ def _detect_communities(G_undirected, all_nodes):
             community_id = max(0, node_degree) % 8  # Using modulo 8 to limit number of colors
             node_communities[node] = community_id
         community_count = len(set(node_communities.values()))
-        print(f"Using degree-based communities ({community_count} communities)")
+        print(f"Usando comunidades basadas en grados ({community_count} comunidades)")
         return node_communities, community_count
 
 def _calculate_node_sizes(all_nodes, betweenness, degree, eigenvector):
@@ -342,13 +342,13 @@ def _save_and_modify_html(net, output_file, community_count, all_nodes, triples)
     html = re.sub(r'<center>\s*<h1>.*?</h1>\s*</center>', '', html)
     
     # Replace the other h1 with our enhanced title
-    html = html.replace('<h1></h1>', f'<h1>Knowledge Graph - {len(all_nodes)} Nodes, {len(triples)} Relationships, {community_count} Communities</h1>')
+    html = html.replace('<h1></h1>', f'<h1>Grafo de Conocimiento - {len(all_nodes)} Nodos, {len(triples)} Relaciones, {community_count} Comunidades</h1>')
     
     # Write the HTML directly to the output file with explicit UTF-8 encoding
     with open(output_file, 'w', encoding='utf-8') as f:
         f.write(html)
     
-    print(f"Knowledge graph visualization saved to {output_file}")
+    print(f"Visualización del grafo de conocimiento guardada en {output_file}")
 
 def sample_data_visualization(output_file="sample_knowledge_graph.html", edge_smooth=None, config=None):
     """
@@ -363,27 +363,27 @@ def sample_data_visualization(output_file="sample_knowledge_graph.html", edge_sm
     """
     # Sample data representing knowledge graph triples
     sample_triples = [
-        {"subject": "Industrial Revolution", "predicate": "began in", "object": "Great Britain"},
-        {"subject": "Industrial Revolution", "predicate": "characterized by", "object": "machine manufacturing"},
-        {"subject": "Industrial Revolution", "predicate": "led to", "object": "urbanization"},
-        {"subject": "Industrial Revolution", "predicate": "led to", "object": "rise of capitalism"},
-        {"subject": "Industrial Revolution", "predicate": "led to", "object": "new labor movements"},
-        {"subject": "Industrial Revolution", "predicate": "fueled by", "object": "technological innovations"},
-        {"subject": "James Watt", "predicate": "developed", "object": "steam engine"},
-        {"subject": "James Watt", "predicate": "born in", "object": "Scottland"},
-        {"subject": "Scottland", "predicate": "a country in", "object": "Europe"},
-        {"subject": "steam engine", "predicate": "revolutionized", "object": "transportation"},
-        {"subject": "steam engine", "predicate": "revolutionized", "object": "manufacturing processes"},
-        {"subject": "steam engine", "predicate": "spread to", "object": "Europe"},
-        {"subject": "steam engine", "predicate": "lead to", "object": "Industrial Revolution"},
-        {"subject": "steam engine", "predicate": "spread to", "object": "North America"},
-        {"subject": "technological innovations", "predicate": "led to", "object": "Digital Computers"},
-        {"subject": "Digital Computers", "predicate": "enabled", "object": "Artificial Intelligence"},
-        {"subject": "Artificial Intelligence", "predicate": "will replace", "object": "Humanity"},
-        {"subject": "Artificial Intelligence", "predicate": "led to", "object": "LLMs"},
-        {"subject": "Robert McDermott", "predicate": "likes", "object": "LLMs"},
-        {"subject": "Robert McDermott", "predicate": "owns", "object": "Digital Computers"},
-        {"subject": "Robert McDermott", "predicate": "lives in", "object": "North America"}
+        {"subject": "revolución industrial", "predicate": "comenzó en", "object": "gran bretaña"},
+        {"subject": "revolución industrial", "predicate": "se caracterizó por", "object": "manufactura mecanizada"},
+        {"subject": "revolución industrial", "predicate": "llevó a", "object": "urbanización"},
+        {"subject": "revolución industrial", "predicate": "llevó a", "object": "auge del capitalismo"},
+        {"subject": "revolución industrial", "predicate": "llevó a", "object": "nuevos movimientos laborales"},
+        {"subject": "revolución industrial", "predicate": "impulsada por", "object": "innovaciones tecnológicas"},
+        {"subject": "james watt", "predicate": "desarrolló", "object": "máquina de vapor"},
+        {"subject": "james watt", "predicate": "nació en", "object": "escocia"},
+        {"subject": "escocia", "predicate": "es país de", "object": "europa"},
+        {"subject": "máquina de vapor", "predicate": "revolucionó", "object": "transporte"},
+        {"subject": "máquina de vapor", "predicate": "revolucionó", "object": "procesos manufactureros"},
+        {"subject": "máquina de vapor", "predicate": "se extendió a", "object": "europa"},
+        {"subject": "máquina de vapor", "predicate": "llevó a", "object": "revolución industrial"},
+        {"subject": "máquina de vapor", "predicate": "se extendió a", "object": "norteamérica"},
+        {"subject": "innovaciones tecnológicas", "predicate": "llevaron a", "object": "computadoras digitales"},
+        {"subject": "computadoras digitales", "predicate": "habilitaron", "object": "inteligencia artificial"},
+        {"subject": "inteligencia artificial", "predicate": "reemplazará", "object": "humanidad"},
+        {"subject": "inteligencia artificial", "predicate": "llevó a", "object": "modelos de lenguaje"},
+        {"subject": "roberto mcdermott", "predicate": "le gustan", "object": "modelos de lenguaje"},
+        {"subject": "roberto mcdermott", "predicate": "posee", "object": "computadoras digitales"},
+        {"subject": "roberto mcdermott", "predicate": "vive en", "object": "norteamérica"}
     ]
     
     # Determine edge smoothing from config if not explicitly provided
@@ -393,26 +393,26 @@ def sample_data_visualization(output_file="sample_knowledge_graph.html", edge_sm
         edge_smooth = False
     
     # Generate the visualization
-    print(f"Generating sample visualization with {len(sample_triples)} triples")
+    print(f"Generando visualización de muestra con {len(sample_triples)} tripletes")
     
     # Display edge smoothing type
     if edge_smooth is False:
-        edge_style = "Straight (no smoothing)"
+        edge_style = "Rectas (sin suavizado)"
     elif isinstance(edge_smooth, str):
         edge_style = edge_smooth
     else:
-        edge_style = "continuous (default curved)"
+        edge_style = "continuas (curvas por defecto)"
     
-    print(f"Edge style: {edge_style}")
+    print(f"Estilo de aristas: {edge_style}")
     stats = visualize_knowledge_graph(sample_triples, output_file, edge_smooth=edge_smooth, config=config)
     
     print("\nSample Knowledge Graph Statistics:")
-    print(f"Nodes: {stats['nodes']}")
-    print(f"Edges: {stats['edges']}")
-    print(f"Communities: {stats['communities']}")
+    print(f"Nodos: {stats['nodes']}")
+    print(f"Aristas: {stats['edges']}")
+    print(f"Comunidades: {stats['communities']}")
     
-    print(f"\nVisualization saved to {output_file}")
-    print(f"To view, open: file://{os.path.abspath(output_file)}") 
+    print(f"\nVisualización guardada en {output_file}")
+    print(f"Para ver, abre: file://{os.path.abspath(output_file)}") 
 
 if __name__ == "__main__":
     # Run sample visualization when this module is run directly
@@ -422,36 +422,36 @@ if __name__ == "__main__":
     config = load_config()
     if config is None:
         config = {"visualization": {"edge_smooth": False}}
-        print("No config.toml found, using default settings")
+        print("No se encontró config.toml, usando configuración predeterminada")
     
     # Create sample visualizations with different edge types
     examples = [
-        ("sample_knowledge_graph_straight.html", False, "Straight edges (no smoothing)"),
-        ("sample_knowledge_graph_curvedCW.html", "curvedCW", "Curved clockwise"),
-        ("sample_knowledge_graph_curvedCCW.html", "curvedCCW", "Curved counter-clockwise"),
-        ("sample_knowledge_graph_dynamic.html", "dynamic", "Dynamic edges"),
-        ("sample_knowledge_graph_cubicBezier.html", "cubicBezier", "Cubic Bezier curves"),
+        ("sample_knowledge_graph_straight.html", False, "Aristas rectas (sin suavizado)"),
+        ("sample_knowledge_graph_curvedCW.html", "curvedCW", "Curvas en sentido horario"),
+        ("sample_knowledge_graph_curvedCCW.html", "curvedCCW", "Curvas en sentido antihorario"),
+        ("sample_knowledge_graph_dynamic.html", "dynamic", "Aristas dinámicas"),
+        ("sample_knowledge_graph_cubicBezier.html", "cubicBezier", "Curvas Bézier cúbicas"),
     ]
     
     # Create example visualizations
     for filename, edge_type, description in examples:
-        print(f"\nCreating visualization with {description}...")
+        print(f"\nCreando visualización con {description}...")
         config_example = {"visualization": {"edge_smooth": edge_type}}
         sample_data_visualization(filename, config=config_example)
     
     # Create visualization using config.toml settings
-    print("\nCreating visualization using configuration from config.toml...")
+    print("\nCreando visualización usando configuración de config.toml...")
     sample_data_visualization("sample_knowledge_graph_config.html", config=config)
     
     # Determine edge style from config for output message
     config_edge_type = config.get("visualization", {}).get("edge_smooth", False)
     if config_edge_type is False:
-        config_description = "straight edges (no smoothing)"
+        config_description = "aristas rectas (sin suavizado)"
     else:
-        config_description = f"edge style '{config_edge_type}'"
+        config_description = f"estilo de aristas '{config_edge_type}'"
     
-    print(f"\nCreated sample visualizations:")
+    print(f"\nSe crearon visualizaciones de muestra:")
     for filename, _, description in examples:
         print(f"- {filename}: {description}")
-    print(f"- sample_knowledge_graph_config.html: Using {config_description} from config.toml")
-    print("\nTo view these visualizations, open the HTML files in your browser.") 
+    print(f"- sample_knowledge_graph_config.html: Usando {config_description} de config.toml")
+    print("\nPara ver estas visualizaciones, abre los archivos HTML en tu navegador.") 
